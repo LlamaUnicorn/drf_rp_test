@@ -25,7 +25,10 @@ SECRET_KEY = 'django-insecure-m4d&daf&gq0c6i=bp=0r^wx5&34$5t2+04^d-0hgw82ip_n5iz
 # SECURITY WARNING: don't run with debug turned on in production!
 DEBUG = True
 
-ALLOWED_HOSTS = []
+ALLOWED_HOSTS = [
+    'localhost',
+    '127.0.0.1',
+]
 
 
 # Application definition
@@ -37,6 +40,8 @@ INSTALLED_APPS = [
     'django.contrib.sessions',
     'django.contrib.messages',
     'django.contrib.staticfiles',
+    'rest_framework',
+    'people',
 ]
 
 MIDDLEWARE = [
