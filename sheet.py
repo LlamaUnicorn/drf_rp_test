@@ -111,3 +111,80 @@ curl -s -X PATCH -d 'shiny=False' http://127.0.0.1:8000/artifacts/artifacts/1/
 
 # DELETE
 curl -s -X DELETE http://127.0.0.1:8000/artifacts/artifacts/1/
+
+
+# sandbox/artifacts/admin.py
+from django.contrib import admin
+from .models import Artifact
+
+
+@admin.register(Artifact)
+class ArtifactAdmin(admin.ModelAdmin):
+    list_display = ['name', 'shiny']
+
+
+# sandbox/artifacts/apps.py
+from django.apps import AppConfig
+
+
+class ArtifactsConfig(AppConfig):
+    default_auto_field = 'django.db.models.BigAutoField'
+    name = 'artifacts'
+
+# sandbox/artifacts/models.py
+from django.db import models
+
+class Artifact(models.Model):
+    name = models.CharField(max_length=100)
+    shiny = models.BooleanField()
+
+# sandbox/artifacts/serializers.py
+from rest_framework import serializers
+from .models import Artifact
+
+
+class ArtifactSerializer(serializers.ModelSerializer):
+    class Meta:
+        model = Artifact
+        fields = '__all__'
+
+
+# sandbox/artifacts/urls.py
+from django.urls import path, include
+from rest_framework.routers import DefaultRouter
+
+from . import views
+
+router = DefaultRouter()
+router.register(r'artifacts', views.ArtifactViewSet, 'artifact')
+
+
+urlpatterns = [
+        path('', include(router.urls)),
+]
+
+
+# sandbox/artifacts/views.py
+from rest_framework import viewsets
+
+from .models import Artifact
+from .serializers import ArtifactSerializer
+
+
+class ArtifactViewSet(viewsets.ModelViewSet):
+    serializer_class = ArtifactSerializer
+
+    def get_queryset(self):
+        return Artifact.objects.all()
+
+# sandbox/sandbox/urls.py
+from django.contrib import admin
+from django.urls import path, include
+
+
+urlpatterns = [
+    path('admin/', admin.site.urls),
+    path('people/', include('people.urls')),
+    path('artifacts/', include('artifacts.urls')),
+]
+
