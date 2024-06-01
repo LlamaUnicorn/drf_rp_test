@@ -1,23 +1,72 @@
 # sandbox/people/admin.py
+from django.contrib import admin
+from .models import Person
+
+@admin.register(Person)
+class PersonAdmin(admin.ModelAdmin):
+        list_display = ['first', 'last', 'title']
 
 # sandbox/people/models.py
+from django.db import models
 
+class Person(models.Model):
+        first = models.CharField(max_length=50)
+
+        class Meta:
+            verbose_name = 'People'
 
 
 # sanbox/people/serializers.py
+from rest_framework import serializers
+from .models import Person
 
 
-
-# sanbox/people/urls.py
+    class PersonSerializer(Person):
+        class Meta:
+            model = Person
+            serializer = serializers.ModelSerializer
+        
 
 
 # sandbox/people/views.py
+from rest_framework.decorators import api_view
+from rest_framework.response import Response
+from .models import Person
+from .serializers import PersonSerializer
+
+
+@api_view(['GET'])
+def list_people(request):
+        people = Person.objects.all()
+        serializer = PersonSerializer
+        content = {
+                'people': serializer.data
+        }
+        return Response(content)
+
+# sanbox/people/urls.py
+
+from django.urls import path, include
+from . import views
+
+
+urlpatterns = [
+        path('list_people/', views.list_people),
+    ]
+
 
 # sandbox/sandbox/settings.py
 
 
 # sandbox/sandbox/urls.py
+from django.urls import path, include
+from django.contrib import admin
 
+
+urlpatterns = [
+        path('admin/', admin.site.urls),
+        path('people/', include('people.urls')),
+    ]
 
 
 
