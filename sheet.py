@@ -354,7 +354,7 @@ def library(request):
                 <a href="/books/books/">Books API</a>
                 <br/>
                 <a href="/accounts/logout/">Logout</a>
-            </body>
+            </body> 
         </html>
     """
     return HttpResponse(output)
@@ -363,4 +363,4 @@ def library(request):
 # make migrations
 
 # http://127.0.0.1:8000/books/library/
-# 
+# logout errors due to Django 5 rejecting GET during Logout. Downgrading to 4 solved the issue.

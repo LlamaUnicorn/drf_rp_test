@@ -26,17 +26,17 @@ class IsIndy(BasePermission):
 
 class BookViewSet(viewsets.ModelViewSet):
     serializer_class = BookSerializer
-    permission_classes = [IsAuthenticated]
+    # permission_classes = [IsAuthenticated]
     #permission_classes = [IsAdminUser]
     #permission_classes = [IsSuperUser]
-    #permission_classes = [IsIndy | IsSuperUser]
+    permission_classes = [IsIndy | IsSuperUser]
 
     def get_queryset(self):
-        return Book.objects.all()
-        #if self.request.user.is_staff:
-        #    return Book.objects.all()
+        # return Book.objects.all()
+        if self.request.user.is_staff:
+           return Book.objects.all()
 
-        #return Book.objects.filter(restricted=False)
+        return Book.objects.filter(restricted=False)
 
 
 @login_required
