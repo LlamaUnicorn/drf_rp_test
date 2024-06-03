@@ -1,5 +1,6 @@
 # sandbox/people/models.py
 from django.db import models
+from django.utils.autoreload import restart_with_reloader
 
 
 class Person(models.Model):
@@ -92,8 +93,6 @@ urlpatterns = [
 # Part Two ViewSets
     # ViewSets allow you to get the REST methods: List, Retrieve, Create, Update, Update Partial, Delete
 # Routers define all the URL mappings for ViewSets
-
-
 
 
 
@@ -235,3 +234,133 @@ http://127.0.0.1:8000/artifacts/artifacts/
 
 # edit entry 
 http://127.0.0.1:8000/artifacts/artifacts/1/
+
+
+
+# Part 3: Permissions
+
+# create templates folder on the same level as the manage.py
+mkdir templates
+mkdir templates/registration
+
+# settings.py
+TEMPLATES = [
+    {
+        'BACKEND': 'django.template.backends.django.DjangoTemplates',
+        'DIRS': [BASE_DIR / 'templates'],
+
+
+LOGIN_REDIRECT_URL = '/books/library/'
+
+
+
+# urls.py
+    path('accounts/', include('django.contrib.auth.urls')),
+
+
+# templates/registration/login.html
+
+<!-- templates/registration/login.html -->
+<html>
+  <base>
+    <h2>Login</h2>
+
+    <form method="post">
+      {% csrf_token %}
+      {{ form.as_p }}
+      <input type="submit" value="login">
+    </form>
+  </base>
+</html>
+        
+# create 2 users
+
+# Permissions part 2
+python manage.py startapp books
+
+# update installed ups
+
+# update urls.py
+
+    path('books/', include('books.urls')),
+
+
+# books/models.py
+from django.db import models
+
+
+class Book(models.Model):
+    title = models.CharField(max_length=100)
+    restricted = models.BooleanField()
+
+
+# books/serializers.py
+from rest_framework import serializers
+from .models import Book
+
+
+class BookSerializer(serializers.ModelSerializer):
+    class Meta:
+        model = Book
+        fields = '__all__'
+
+
+# books/urls.py
+
+from django.urls import path, include
+from rest_framework.routers import DefaultRouter
+
+from . import views
+
+router = DefaultRouter()
+router.register(r'books', views.BookViewSet, 'book')
+
+
+urlpatterns = [
+        path('', include(router.urls)),
+        path('library/', views.library),
+]
+
+
+
+
+# books/views.py
+from django.contrib.auth.decorators import login_required
+from django.http import HttpResponse
+
+from rest_framework import viewsets
+from rest_framework.permissions import IsAuthenticated, IsAdminUser, BasePermission
+
+from .models import Book
+from .serializers import BookSerializer
+
+
+class BookViewSet(viewsets.ModelViewSet):
+    serializer_class = BookSerializer
+    permission_classes = [IsAuthenticated]
+
+    def get_queryset(self):
+        return Books.object.all()
+
+
+
+@login_required
+def library(request):
+    output = f"""
+        <html>
+            <body>
+                <h2>Library</h2>
+                <p>{request.user.username}</p>
+                <a href="/books/books/">Books API</a>
+                <br/>
+                <a href="/accounts/logout/">Logout</a>
+            </body>
+        </html>
+    """
+    return HttpResponse(output)
+
+
+# make migrations
+
+# http://127.0.0.1:8000/books/library/
+# 
