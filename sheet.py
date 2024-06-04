@@ -1,6 +1,7 @@
 # sandbox/people/models.py
 from django.db import models
 from django.utils.autoreload import restart_with_reloader
+import rest_framework
 
 
 class Person(models.Model):
@@ -335,13 +336,35 @@ from .models import Book
 from .serializers import BookSerializer
 
 
+class IsSuperUser(BasePermission):
+    def has_permission(self, request, view):
+        return request.user.is_superuser
+
+    def has_object_permission(self, request, view, obj):
+        return request.user.is_superuser
+
+
+class IsIndy(BasePermission):
+    def has_object_permission(self, request, view, obj):
+        if not obj.restricted:
+            return True
+
+        return request.user.username == "indy"
+
+
 class BookViewSet(viewsets.ModelViewSet):
     serializer_class = BookSerializer
     permission_classes = [IsAuthenticated]
+    #permission_classes = [IsAdminUser]
+    #permission_classes = [IsSuperUser]
+    #permission_classes = [IsIndy | IsSuperUser]
 
     def get_queryset(self):
-        return Books.object.all()
+        return Book.objects.all()
+        #if self.request.user.is_staff:
+        #    return Book.objects.all()
 
+        #return Book.objects.filter(restricted=False)
 
 
 @login_required
@@ -354,7 +377,7 @@ def library(request):
                 <a href="/books/books/">Books API</a>
                 <br/>
                 <a href="/accounts/logout/">Logout</a>
-            </body> 
+            </body>
         </html>
     """
     return HttpResponse(output)
@@ -364,3 +387,65 @@ def library(request):
 
 # http://127.0.0.1:8000/books/library/
 # logout errors due to Django 5 rejecting GET during Logout. Downgrading to 4 solved the issue.
+
+
+# Serializers
+# create vehicles app and register it
+
+# vehicles/models/tools.py
+class Tool:
+    def __init__(self, name, make):
+        self.name = name
+        self.make = make
+
+
+# in order for tools to work init the tool
+# vehicles/models/__init__.py
+from .tools import Tool
+
+
+# vehicles/serializers/tools.py
+from rest_framework import serializers
+
+
+class ToolSerializer(serializers.Serializer):
+        name = serializers.CharField(max_length=50)
+        make = serializers.CharField(max_length=50)
+        
+
+# vehicle/views/tools.py
+
+from rest_framework.decorators import api_view
+from rest_framework.response import Response
+
+from vehicles.models import Tool
+from vehicles.serializers.tools import ToolSerializer
+
+
+@api_view(['GET'])
+def list_tools(request):
+    tools = [
+        Tool('hammer', 'Mastercraft'),
+        Tool('wrench', 'Husky'),
+    ]
+
+    serializer = ToolSerializer(tools, many=True)
+    content = {
+            'tools': serializer.data,
+    }
+
+    return Response(content)
+
+
+
+# vehicle/urls.py
+
+from django.urls import path
+
+from .views import tools 
+
+
+urlpatterns = [
+        path('list_tools/', tools.list_tools),
+]
+
