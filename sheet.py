@@ -41,6 +41,7 @@ from rest_framework.response import Response
 from .models import Person
 from .serializers import PersonSerializer
 
+
 @api_view(['GET'])
 def list_people(request):
     people = Person.objects.all()
@@ -58,10 +59,8 @@ from django.urls import path
 from . import views
 
 urlpatterns = [
-        path('list_people/', views.list_people),
+    path('list_people/', views.list_people),
 ]
-
-
 
 # sandbox/sandbox/settings.py
 ALLOWED_HOSTS = [
@@ -80,7 +79,6 @@ INSTALLED_APPS = [
     'people',
 ]
 
-
 # sandbox/sandbox/urls.py
 from django.contrib import admin
 from django.urls import path, include
@@ -90,11 +88,9 @@ urlpatterns = [
     path('people/', include('people.urls')),
 ]
 
-
 # Part Two ViewSets
-    # ViewSets allow you to get the REST methods: List, Retrieve, Create, Update, Update Partial, Delete
+# ViewSets allow you to get the REST methods: List, Retrieve, Create, Update, Update Partial, Delete
 # Routers define all the URL mappings for ViewSets
-
 
 
 # sandbox/artifacts/apps.py
@@ -105,8 +101,10 @@ class ArtifactsConfig(AppConfig):
     default_auto_field = 'django.db.models.BigAutoField'
     name = 'artifacts'
 
+
 # sandbox/artifacts/models.py
 from django.db import models
+
 
 class Artifact(models.Model):
     name = models.CharField(max_length=100)
@@ -133,6 +131,7 @@ class ArtifactSerializer(serializers.ModelSerializer):
         model = Artifact
         fields = '__all__'
 
+
 # sandbox/artifacts/views.py
 from rest_framework import viewsets
 
@@ -146,6 +145,7 @@ class ArtifactViewSet(viewsets.ModelViewSet):
     def get_queryset(self):
         return Artifact.objects.all()
 
+
 # sandbox/artifacts/urls.py
 from django.urls import path, include
 from rest_framework.routers import DefaultRouter
@@ -156,21 +156,18 @@ router = DefaultRouter()
 router.register(r'artifacts', views.ArtifactViewSet, 'artifact')
 
 urlpatterns = [
-        path('', include(router.urls)),
+    path('', include(router.urls)),
 ]
-
 
 # sandbox/sandbox/urls.py
 from django.contrib import admin
 from django.urls import path, include
-
 
 urlpatterns = [
     path('admin/', admin.site.urls),
     path('people/', include('people.urls')),
     path('artifacts/', include('artifacts.urls')),
 ]
-
 
 # Get List
 curl -s http://127.0.0.1:8000/artifacts/artifacts/ | python -m json.tool
@@ -197,25 +194,27 @@ curl -s -X DELETE http://127.0.0.1:8000/artifacts/artifacts/1/
 
 # Part 3. Web
 
-#Setting global renderers
+# Setting global renderers
 # settings.py 
 REST_FRAMEWORK = {
-        'DEFAULT_RENDERER_CLASS': [
-            'rest_framework.renderers.JSONRenderer',
-            'rest_framework.renderers.BrowsableAPIRenderer',  # degrades performance by downloading all possible choices. Good for debugging, disable on production
-        ]
+    'DEFAULT_RENDERER_CLASS': [
+        'rest_framework.renderers.JSONRenderer',
+        'rest_framework.renderers.BrowsableAPIRenderer',
+        # degrades performance by downloading all possible choices. Good for debugging, disable on production
+    ]
 }
+
 
 # Local renderer with a decorator
 @api_view(['GET'])
 @renderer_classes([JSONRenderer])
 def user_count_view(request, format=None):
     user_count = User.objects.filter(active=True).count()
-    content = {'user_count':user_count}
+    content = {'user_count': user_count}
     return Response(content)
 
 
-#or within APIView set:
+# or within APIView set:
 from django.contrib.auth.models import User
 from rest_framework.renderers import JSONRenderer
 from rest_framework.response import Response
@@ -229,6 +228,7 @@ class UserCountView(APIView):
         user_count = User.objects.filter(active=True).count()
         content = {'user_count': user_count}
         return Response(content)
+
 
 # browser
 http://127.0.0.1:8000/artifacts/artifacts/
@@ -253,11 +253,8 @@ TEMPLATES = [
 
 LOGIN_REDIRECT_URL = '/books/library/'
 
-
-
 # urls.py
     path('accounts/', include('django.contrib.auth.urls')),
-
 
 # templates/registration/login.html
 
@@ -283,8 +280,7 @@ python manage.py startapp books
 
 # update urls.py
 
-    path('books/', include('books.urls')),
-
+path('books/', include('books.urls')),
 
 # books/models.py
 from django.db import models
@@ -316,14 +312,10 @@ from . import views
 router = DefaultRouter()
 router.register(r'books', views.BookViewSet, 'book')
 
-
 urlpatterns = [
-        path('', include(router.urls)),
-        path('library/', views.library),
+    path('', include(router.urls)),
+    path('library/', views.library),
 ]
-
-
-
 
 # books/views.py
 from django.contrib.auth.decorators import login_required
@@ -355,16 +347,17 @@ class IsIndy(BasePermission):
 class BookViewSet(viewsets.ModelViewSet):
     serializer_class = BookSerializer
     permission_classes = [IsAuthenticated]
-    #permission_classes = [IsAdminUser]
-    #permission_classes = [IsSuperUser]
-    #permission_classes = [IsIndy | IsSuperUser]
+
+    # permission_classes = [IsAdminUser]
+    # permission_classes = [IsSuperUser]
+    # permission_classes = [IsIndy | IsSuperUser]
 
     def get_queryset(self):
         return Book.objects.all()
-        #if self.request.user.is_staff:
+        # if self.request.user.is_staff:
         #    return Book.objects.all()
 
-        #return Book.objects.filter(restricted=False)
+        # return Book.objects.filter(restricted=False)
 
 
 @login_required
@@ -403,15 +396,14 @@ class Tool:
 # vehicles/models/__init__.py
 from .tools import Tool
 
-
 # vehicles/serializers/tools.py
 from rest_framework import serializers
 
 
 class ToolSerializer(serializers.Serializer):
-        name = serializers.CharField(max_length=50)
-        make = serializers.CharField(max_length=50)
-        
+    name = serializers.CharField(max_length=50)
+    make = serializers.CharField(max_length=50)
+
 
 # vehicle/views/tools.py
 
@@ -431,11 +423,10 @@ def list_tools(request):
 
     serializer = ToolSerializer(tools, many=True)
     content = {
-            'tools': serializer.data,
+        'tools': serializer.data,
     }
 
     return Response(content)
-
 
 
 # vehicle/urls.py
@@ -444,8 +435,90 @@ from django.urls import path
 
 from .views import tools 
 
+urlpatterns = [
+    path('list_tools/', tools.list_tools),
+]
+
+# Nested serialization
+# vehicles/models/vehicles.py
+
+from django.db import models
+
+
+class Vehicle(models.Model):
+    name = models.CharField(max_length=100)
+
+
+class Part(models.Model):
+    name = models.CharField(max_length=100)
+    make = models.CharField(max_length=100)
+    vehicle = models.ForeignKey(Vehicle, on_delete=models.CASCADE)
+
+
+# vehicles/models/__init__.py
+from .tools import Tool
+from .vehicles import Vehicle, Part
+
+# vehicles/serializers/vehicles.py
+from rest_framework import serializers
+from vehicles.models import Vehicle, Part
+
+
+class SerialNumberField(serializers.Field):
+    def to_representation(self, value):
+        code = value.make[:3].upper()
+        return f"{code}-{value.id}"
+
+
+class PartSerializer(serializers.ModelSerializer):
+    serial_no = SerialNumberField(source="*")
+
+    class Meta:
+        model = Part
+        fields = ["url", "name", "vehicle", "serial_no"]
+
+
+class VehicleSerializer(serializers.ModelSerializer):
+    part_set = PartSerializer(many=True, read_only=True)
+
+    class Meta:
+        model = Vehicle
+        fields = ["url", "name", "part_set"]
+
+
+# vehicle/views/vehicles.py
+from rest_framework import viewsets
+from rest_framework.response import Response
+
+from vehicles.models import Vehicle, Part
+from vehicles.serializers.vehicles import VehicleSerializer, PartSerializer
+
+
+class PartViewSet(viewsets.ModelViewSet):
+    serializer_class = PartSerializer
+    queryset = Part.objects.all()
+
+
+class VehicleViewSet(viewsets.ModelViewSet):
+    serializer_class = VehicleSerializer
+
+    def get_queryset(self):
+        return Vehicle.objects.all()
+
+
+# vehicles/urls.py
+from django.urls import path, include
+from rest_framework.routers import DefaultRouter
+
+from .views import tools, vehicles
+
+router = DefaultRouter()
+router.register(r"vehicles", vehicles.VehicleViewSet, "vehicle")
+router.register(r"parts", vehicles.PartViewSet, "part")
 
 urlpatterns = [
-        path('list_tools/', tools.list_tools),
+    path("", include(router.urls)),
+    path("list_tools/", tools.list_tools),
 ]
+
 
