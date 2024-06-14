@@ -522,3 +522,117 @@ urlpatterns = [
 ]
 
 
+# Part 9. Complex nested serialization
+# python manage.py startapp
+# register in installed_apps
+# include api.urls
+
+# api/views.py
+from rest_framework import viewsets, mixins
+from rest_framework.decorators import api_view, action
+from rest_framework.response import Response
+
+from artifacts.models import Artifact
+from people.models import Person
+from vehicles.models import Vehicle
+from people.serializers import PersonSerializer
+from vehicles.serializers.vehicles import VehicleSerializer
+
+
+@api_view(["GET"])
+def listing(request):
+    doctors = Person.objects.filter(title="Dr.")
+    vehicles = Vehicle.objects.all()
+
+    context = {
+        "request": request,
+    }
+    vehicle_serializer = VehicleSerializer(vehicles, many=True, context=context)
+
+    results = {
+        "doctors": PersonSerializer(doctors, many=True).data,
+        "vehicles": vehicle_serializer.data,
+    }
+
+    return Response(results)
+
+
+# apis/urls.py
+# Without routers you won't get the discovery within the web api in the root listing
+from django.urls import path, include
+from rest_framework.routers import DefaultRouter
+
+from . import views
+
+
+urlpatterns = [
+    path("v1/listing/", views.listing),
+]
+
+
+curl -s http://127.0.0.1:8000/api/v1/listing/ | python -m json.tool
+
+
+# Add new viewset
+# api/views.py
+class DoctorsViewSet(mixins.ListModelMixin, viewsets.GenericViewSet):
+    def list(self, request):
+        doctors = Person.objects.filter(title="Dr.")
+        results = {
+            "doctors": PersonSerializer(doctors, many=True).data,
+        }
+
+        return Response(results)
+
+
+# updated api/urls.py
+from django.urls import path, include
+from rest_framework.routers import DefaultRouter
+
+from . import views
+
+router = DefaultRouter()
+router.register(r"doctors", views.DoctorsViewSet, "doctor")
+
+
+urlpatterns = [
+    path("v1/", include(router.urls)),
+    path("v1/listing/", views.listing),
+]
+
+
+# custom mass delete action api/views.py
+class MassDeleteArtifactsViewSet(mixins.DestroyModelMixin, viewsets.GenericViewSet):
+    @action(detail=False, methods=["delete"])
+    def mass_delete(self, request, pk=None):
+        for artifact_id in request.POST["ids"].split(","):
+            Artifact.objects.get(id=artifact_id).delete()
+
+        return Response()
+
+
+# updated urls.py
+# apis/urls.py
+from django.urls import path, include
+from rest_framework.routers import DefaultRouter
+
+from . import views
+
+router = DefaultRouter()
+router.register(r"doctors", views.DoctorsViewSet, "doctor")
+router.register(r"mass_delete", views.MassDeleteArtifactsViewSet, "mass_delete")
+
+urlpatterns = [
+    path("v1/", include(router.urls)),
+    path("v1/listing/", views.listing),
+]
+
+
+# view artifacts
+curl -s http://127.0.0.1:8000/artifacts/artifacts/ | python -m json.tool
+
+# delete multiple artifacts
+curl -X DELETE -d "ids=2,3" http://127.0.0.1:8000/api/v1/mass_delete/mass_delete/
+
+# view empty artifacts
+curl -s http://127.0.0.1:8000/artifacts/artifacts/ | python -m json.tool
