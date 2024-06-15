@@ -1,3 +1,5 @@
+# pip install -r requirements.txt
+
 # sandbox/people/models.py
 from django.db import models
 from django.utils.autoreload import restart_with_reloader
