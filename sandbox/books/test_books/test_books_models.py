@@ -1,7 +1,7 @@
 from django.test import TestCase
 
 from books.models import Book
-from books.tests.factories import BookFactory
+from books.test_books.factories import BookFactory
 
 
 class BookTest(TestCase):
