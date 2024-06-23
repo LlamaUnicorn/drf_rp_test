@@ -1,12 +1,22 @@
-from django.db import models
 from datetime import date
+
+from django.db import models
+
 
 class Author(models.Model):
     name = models.CharField(max_length=100)
 
+    class Meta:
+        verbose_name = "Author"
+        verbose_name_plural = "Authors"
+
 
 class Publisher(models.Model):
     name = models.CharField(max_length=100)
+
+    class Meta:
+        verbose_name = "Publisher"
+        verbose_name_plural = "Publishers"
 
 
 class Book(models.Model):
@@ -15,6 +25,10 @@ class Book(models.Model):
     author = models.ForeignKey(Author, on_delete=models.CASCADE)
     publisher = models.ForeignKey(Publisher, on_delete=models.CASCADE)
     publication_date = models.DateField()
+
+    class Meta:
+        verbose_name = "Book"
+        verbose_name_plural = "Books"
 
     @property
     def full_title(self):

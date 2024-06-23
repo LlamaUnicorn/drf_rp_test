@@ -1,3 +1,25 @@
-Django==3.1.2
-djangorestframework==3.12.1
+asgiref==3.8.1
+attrs==23.2.0
+Django==5.1a1
+django-awl==1.8.2
+django-bstrap-modals==2.4.0
+djangorestframework==3.15.2
+factory-boy==3.3.0
+Faker==25.8.0
+hypothesis==6.103.2
+iniconfig==2.0.0
+logthing==1.0.0
+model-bakery==1.18.1
+packaging==24.1
+pluggy==1.5.0
+portalocker==2.8.2
+pytest==8.2.2
+pytest-django==4.8.0
+python-dateutil==2.9.0.post0
+pytz==2024.1
+screwdriver==0.14.0
+six==1.16.0
+sortedcontainers==2.4.0
+sqlparse==0.5.0
+waelstow==0.11.1
 
