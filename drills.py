@@ -1,14 +1,14 @@
 # sandbox/people/models.py
-from django.db import models
+from django.models import models
 
 
 class Person(models.Model):
-        first = models.CharField(max_length=50)
-        last = models.CharField(max_length=50)
-        title = models.CharField(max_length=5)
+    first = models.CharField(max_length=50)
+    last = models.CharField(max_length=50)
+    title = models.CharField(max_length=5)
 
-        class Meta:
-            verbose_name = 'People'
+    class Meta:
+        verbose_name = 'People'
 
 
 # sandbox/people/admin.py
@@ -18,7 +18,7 @@ from .models import Person
 
 @admin.register(Person)
 class PersonAdmin(admin.ModelAdmin):
-        list_display = ['first', 'last', 'title']
+    list_display = ['first', 'last', 'title']
 
 
 # sanbox/people/serializers.py
