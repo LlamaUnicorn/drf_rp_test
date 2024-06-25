@@ -1,5 +1,6 @@
 # sandbox/people/models.py
 from django.models import models
+# from django.contrib import admin
 
 
 class Person(models.Model):
