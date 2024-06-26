@@ -1,6 +1,8 @@
+# Drill 1: api_view endpoint
+# Create an endpoint for Person model using @api_view
+
 # sandbox/people/models.py
 from django.models import models
-# from django.contrib import admin
 
 
 class Person(models.Model):
@@ -78,7 +80,7 @@ urlpatterns = [
 
 # Part Two ViewSets
     # ViewSets allow you to get the REST methods: List, Retrieve, Create, Update, Update Partial, Delete
-# Rters define all the URL mappings for ViewSets
+# Routers define all the URL mappings for ViewSets
 # Get List
 curl -s http://127.0.0.1:8000/artifacts/artifacts/ | python -m json.tool
 
@@ -97,6 +99,8 @@ curl -s -X PATCH -d 'shiny=False' http://127.0.0.1:8000/artifacts/artifacts/1/
 # DELETE
 curl -s -X DELETE http://127.0.0.1:8000/artifacts/artifacts/1/
 
+# Drill 2: ViewSets
+# Create a ViewSet for Artifact model with default_router.
 
 # sandbox/artifacts/apps.py
 
@@ -108,7 +112,6 @@ from django.db import models
 class Artifact(models.Model):
     name = CharField(max_length=100)
     shiny = BooleanField()
-
 
 
 # sandbox/artifacts/admin.py
@@ -173,3 +176,47 @@ urlpatterns = [
         path('list_people/', include('people.urls')),
         path('artifacts/', include('artifacts.urls')),
 ]
+
+
+# Drill 3: Setting up Web interface.
+# Setting global renderers
+# settings.py
+REST_FRAMEWORK = {
+    'DEFAULT_RENDERER_CLASS': [
+        'rest_framework.renderers.JSONRenderer',
+        'rest_framework.renderers.BrowsableAPIRenderer',
+        # degrades performance by downloading all possible choices. Good for debugging, disable on production
+    ]
+}
+
+
+# Local renderer with a decorator
+@api_view(['GET'])
+@renderer_classes([JSONRenderer])
+def user_count_view(request, format=None):
+    user_count = User.objects.filter(active=True).count()
+    content = {'user_count': user_count}
+    return Response(content)
+
+
+# or within APIView set:
+from django.contrib.auth.models import User
+from rest_framework.renderers import JSONRenderer
+from rest_framework.response import Response
+from rest_framework.views import APIView
+
+
+class UserCountView(APIView):
+    renderer_classes = [JSONRenderer]
+
+    def get(self, request, format=None):
+        user_count = User.objects.filter(active=True).count()
+        content = {'user_count': user_count}
+        return Response(content)
+
+
+# browser
+http://127.0.0.1:8000/artifacts/artifacts/
+
+# edit entry
+http://127.0.0.1:8000/artifacts/artifacts/1/
