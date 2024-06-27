@@ -278,7 +278,7 @@ LOGIN_REDIRECT_URL = '/books/library/'
 # Permissions part 2
 python manage.py startapp books
 
-# update installed ups
+# update installed apps
 
 # update urls.py
 
