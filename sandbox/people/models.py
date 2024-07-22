@@ -7,4 +7,4 @@ class Person(models.Model):
     title = models.CharField(max_length=5)
 
     class Meta:
-        verbose_name_plural = 'People'
+        verbose_name = 'People'
